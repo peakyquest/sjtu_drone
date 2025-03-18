@@ -16,8 +16,6 @@ import xacro
 def generate_launch_description():
     # Define launch arguments
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
-    use_gui = DeclareLaunchArgument("use_gui", default_value="true", choices=["true", "false"],
-                                    description="Whether to execute gzclient")
 
     # New launch arguments for specifying spawn position
     x_pos = LaunchConfiguration("x", default="0.0")
@@ -25,7 +23,6 @@ def generate_launch_description():
     z_pos = LaunchConfiguration("z", default="1.0")
 
     xacro_file_name = "sjtu_drone.urdf.xacro"
-    pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
     
     xacro_file = os.path.join(
         get_package_share_directory("sjtu_drone_description"),
@@ -34,7 +31,7 @@ def generate_launch_description():
     
     yaml_file_path = os.path.join(
         get_package_share_directory('sjtu_drone_bringup'),
-        'config', 'robot_1.yaml'
+        'config', 'robot_2.yaml'
     )   
     
     # Process xacro file with parameters
@@ -48,26 +45,10 @@ def generate_launch_description():
         model_ns = yaml_dict["namespace"]  # Assign from YAML
     print("Namespace:", model_ns)
 
-    world_file = os.path.join(
-        get_package_share_directory("sjtu_drone_description"),
-        "worlds", "playground.world"
-    )
-
-    # Function to conditionally launch Gazebo client
-    def launch_gzclient(context, *args, **kwargs):
-        if context.launch_configurations.get('use_gui') == 'true':
-            return [IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py')
-                ),
-                launch_arguments={'verbose': 'true'}.items()
-            )]
-        return []
 
     return LaunchDescription([
         # Declare launch arguments
-        use_gui,
-        DeclareLaunchArgument("x", default_value="0.0", description="Initial X position"), # Change the value of x y and z
+        DeclareLaunchArgument("x", default_value="5.0", description="Initial X position"), # Change the value of x y and z
         DeclareLaunchArgument("y", default_value="0.0", description="Initial Y position"),
         DeclareLaunchArgument("z", default_value="1.0", description="Initial Z position"),
 
@@ -90,19 +71,6 @@ def generate_launch_description():
             namespace=model_ns,
             output='screen',
         ),
-
-        # Gazebo Server
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')
-            ),
-            launch_arguments={'world': world_file,
-                              'verbose': "true",
-                              'extra_gazebo_args': 'verbose'}.items()
-        ),
-
-        # Gazebo Client (GUI)
-        OpaqueFunction(function=launch_gzclient),
 
         # Spawn Drone at Specified Position
         Node(
