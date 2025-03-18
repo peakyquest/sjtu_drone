@@ -67,7 +67,7 @@ def generate_launch_description():
     return LaunchDescription([
         # Declare launch arguments
         use_gui,
-        DeclareLaunchArgument("x", default_value="5.0", description="Initial X position"), # Change the value of x y and z
+        DeclareLaunchArgument("x", default_value="0.0", description="Initial X position"), # Change the value of x y and z
         DeclareLaunchArgument("y", default_value="0.0", description="Initial Y position"),
         DeclareLaunchArgument("z", default_value="1.0", description="Initial Z position"),
 
